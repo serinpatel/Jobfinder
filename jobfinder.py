@@ -43,7 +43,7 @@ def extract_job_link(job):
 
 # --- Search Jobs with Retry and Pagination ---
 def search_jobs(role, location, min_jobs=10):
-    """Fetch at least min_jobs from the past 24 hours."""
+    """Fetch at least min_jobs actually posted in the past 24 hours."""
     params = {
         "engine": "google_jobs",
         "q": f"{role} {location}",
@@ -52,25 +52,45 @@ def search_jobs(role, location, min_jobs=10):
         "date_posted": "past_24_hours",
         "num": 10
     }
+
     all_results = []
+    seen = set()
     attempts = 0
 
-    while len(all_results) < min_jobs and attempts < 5:
+    while len(all_results) < min_jobs and attempts < 6:
         search = GoogleSearch(params)
-        results = search.get_dict().get("jobs_results", [])
+        data = search.get_dict()
+        results = data.get("jobs_results", [])
+        if not results:
+            print(f"No results for {role} in {location} on attempt {attempts+1}")
+            break
+
         for job in results:
-            # Avoid duplicates
-            key = (job.get("title", ""), job.get("company_name", ""))
-            if key not in {(j.get('title', ''), j.get('company_name', '')) for j in all_results}:
+            title = job.get("title", "")
+            company = job.get("company_name", "")
+            key = (title, company)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            # Filter: keep only jobs clearly within last 24 hours
+            posted_at = str(job.get("detected_extensions", {}).get("posted_at", "")).lower()
+            if any(kw in posted_at for kw in ["hour", "minute", "just posted", "today", "1 day"]):
                 all_results.append(job)
+
+        # Stop early if we reached minimum
+        if len(all_results) >= min_jobs:
+            break
+
+        # Broad search fallback (broaden query after 3 tries)
         attempts += 1
-        time.sleep(2)  # avoid rate limits
+        if attempts == 3:
+            params["q"] = f"{role} Canada"
+        time.sleep(2)
 
-        # Try broadening the query if still fewer jobs
-        if len(all_results) < min_jobs and attempts == 3:
-            params["q"] = f"{role} Canada"  # expand to broader search
+    print(f"{role} in {location}: Found {len(all_results)} jobs from last 24 hrs")
+    return all_results[:min_jobs]
 
-    return all_results[:max(min_jobs, len(all_results))]
 
 # --- Match Jobs to Resumes ---
 def match_jobs_to_resumes(jobs):
