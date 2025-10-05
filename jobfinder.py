@@ -5,16 +5,26 @@ from email.mime.text import MIMEText
 from serpapi import GoogleSearch
 import yaml
 from datetime import datetime
+from sentence_transformers import SentenceTransformer, util
+
 
 # --- Load config ---
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-# --- Secrets from environment (GitHub Actions) ---
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 EMAIL_TO = os.getenv("EMAIL_TO", EMAIL_USER)
+
+# --- Load resumes ---
+resumes = {
+    "Dhaval": open("resume_dhaval.txt", "r", encoding="utf-8").read(),
+    "Serin": open("resume_serin.txt", "r", encoding="utf-8").read()
+}
+
+# --- Embedding model ---
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Job Search ---
 def search_jobs(role, location):
@@ -28,26 +38,37 @@ def search_jobs(role, location):
     search = GoogleSearch(params)
     return search.get_dict().get("jobs_results", [])
 
-# --- Build Combined HTML ---
-def build_combined_html(all_results):
+# --- Similarity Scoring ---
+def match_jobs_to_resumes(jobs):
+    matches = {name: [] for name in resumes}
+    for j in jobs:
+        desc = " ".join([j.get("title", ""), j.get("company_name", ""), j.get("description", "")])
+        if not desc.strip():
+            continue
+        job_emb = model.encode(desc, convert_to_tensor=True)
+        for name, text in resumes.items():
+            score = float(util.cos_sim(model.encode(text, convert_to_tensor=True), job_emb))
+            matches[name].append((score, j))
+    return matches
+
+# --- Email Formatting ---
+def build_email(matches):
     today = datetime.now().strftime('%b %d, %Y')
     html = f"<html><body><h2>🧭 Daily Job Digest ({today})</h2>"
-    if not any(all_results.values()):
-        html += "<p>No new jobs found today.</p></body></html>"
-        return html
 
-    for role, jobs in all_results.items():
-        html += f"<h3>🔹 {role}</h3>"
-        if not jobs:
-            html += "<p>No new postings found for this role today.</p>"
+    for name, job_list in matches.items():
+        html += f"<h3>👤 {name}</h3>"
+        top_jobs = sorted(job_list, key=lambda x: x[0], reverse=True)[:5]
+        if not top_jobs:
+            html += "<p>No matches today.</p>"
             continue
         html += "<ul>"
-        for j in jobs[:15]:
+        for score, j in top_jobs:
             title = j.get("title", "No title")
             company = j.get("company_name", "Unknown")
             location = j.get("location", "Unknown")
             link = j.get("link", "#")
-            html += f"<li><b>{title}</b> at {company} ({location})<br><a href='{link}'>View Job</a></li>"
+            html += f"<li><b>{title}</b> at {company} ({location}) – <b>{int(score*100)}% match</b><br><a href='{link}'>View Job</a></li>"
         html += "</ul><br>"
     html += "</body></html>"
     return html
@@ -69,16 +90,16 @@ def send_email(subject, html_content):
 
 # --- Main ---
 def main():
-    all_results = {}
+    all_jobs = []
     for role in config["roles"]:
-        jobs = []
         for loc in config["locations"]:
-            jobs.extend(search_jobs(role, loc))
-        all_results[role] = jobs
+            all_jobs.extend(search_jobs(role, loc))
+    print(f"Fetched {len(all_jobs)} jobs")
 
-    html = build_combined_html(all_results)
+    matches = match_jobs_to_resumes(all_jobs)
+    html = build_email(matches)
     send_email(
-        subject=f"🧭 Daily Job Digest – {datetime.now().strftime('%b %d, %Y')}",
+        subject=f"🧭 AI-Powered Job Matches – {datetime.now().strftime('%b %d, %Y')}",
         html_content=html
     )
 
