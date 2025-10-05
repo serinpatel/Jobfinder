@@ -1,0 +1,35 @@
+Serin Kalpeshkumar Patel	                Application Support Analyst
+Toronto, Canada | 647-643-6424 | sherinpatel5@gmail.com | LinkedIn
+PROFESSIONAL SUMMARY
+Application Support Analyst with 4+ years supporting enterprise applications and data platforms. Expertise in UNIX/Linux/Windows, SQL/Python, ServiceNow/Jira, and monitoring (Splunk/ELK). Cloud experience across Azure/AWS; scheduler SME for Tidal (familiar with Autosys). Drive incident resolution, RCA, and proactive automation; familiar with OpenShift and Axway (FeedHub) integration patterns. 
+EXPERIENCE
+Application Support Analyst (Co-op) — Royal Paan | Brampton, ON 			  	     Jan 2024 – Apr 2024
+•	Monitored Python/SQL ETL pipelines processing 50K+ monthly transactions; stabilized SLA adherence and cut manual fixes by 30% through validation scripts and alerting.
+•	Built near–real-time Power BI operational dashboards, trimming manual reporting effort by 50% and improving issue triage time for regional leads.
+•	Tuned Spark jobs and query logic to reduce data latency; enabled pricing tests that lifted AOV 12% and improved retention 9%.
+•	Authored support runbooks and on-call procedures covering data checks, rollbacks, and escalation paths, lowering MTTR in recurring incidents.
+Support Specialist (L2/L3 RPA Support) — Accelirate Infotech | Pune, India 		 	     Jan 2022 – Aug 2022
+•	Sustained 20+ UiPath processes with 98% uptime; compressed average incident time from 4h → 45m via triage playbooks and RCA templates.
+•	Owned 40+ weekly tickets during L1 gaps with 95% SLA hit rate; coordinated fixes with dev/DB teams to remove 75% of repeat issues.
+•	Debugged Python/SQL automations and hardened workflows, cutting bot failures 40% and improving execution time 25%.
+•	Standardized Jira/Confluence documentation to streamline ticket logging and knowledge reuse.
+Application Support Analyst (Production Support) — Atos Syntel | Pune, India          		   Nov 2018 – Dec 2021
+•	Managed L1 support for 50+ applications on Linux/UNIX and Windows Server; resolved 60–75 monthly incidents across P1–P4 with 95% on-time closure.
+•	Supported Informatica/Kalido MDM & EDW; achieved 99.8% data accuracy via proactive monitoring and data quality controls.
+•	Built recovery and restart scripts in Bash/PowerShell for failed services (systemd/Windows Services), cutting bot failures 40% and boosting throughput 25%.
+•	Authored knowledge base articles and trained junior analysts, driving a 30% drop in repeat incidents and shorter maintenance windows (4h → 2.5h).
+•	Collaborated with DB and integration teams (Informatica, Tibco, REST APIs) to cut failed data loads 40%.
+SKILLS
+•	Operating Systems: UNIX, Linux, Windows Server
+•	Cloud: Microsoft Azure, AWS
+•	Containers & Orchestration: Familiar with OpenShift; container concepts
+•	Schedulers / Workload Automation: Tidal (primary); familiar with Autosys
+•	Monitoring & Observability: Splunk, ELK Stack, log analysis, Power BI
+•	ITSM & Collaboration: ServiceNow, Jira, Confluence, RCA, SLAs, on-call
+•	Data & Integration: SQL (DB2/Oracle/SQL Server), Informatica, Tibco, REST APIs, Axway 
+•	Scripting & CI/CD: Python, Shell, Jenkins, GitHub Actions
+•	Strengths: Incident management, problem solving, communication, runbooks, cross-team coordination
+EDUCATION
+•	Post Graduate Certificate, Artificial Intelligence & Machine Learning, Lambton College, Toronto 
+•	B.E. in Information Technology, Pune University 
+•	Certifications: Microsoft Azure Data Fundamentals | Google Data Analytics Professional Certificate 
