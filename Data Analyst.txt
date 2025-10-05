@@ -1,0 +1,31 @@
+Serin Kalpeshkumar Patel	                    	        Data Analyst
+Toronto, Canada | 647-643-6424 | sherinpatel5@gmail.com | LinkedIn
+PROFESSIONAL SUMMARY
+Detail-oriented Data Analyst with hands-on experience in SQL, Python, ETL, and Power BI. Skilled in building automated pipelines, developing dashboards, and delivering insights that optimize operations and decision-making. Adept at handling large datasets, ensuring data accuracy, and driving measurable efficiency improvements. 
+EXPERIENCE
+Data Analyst (Co-op) — Royal Paan, Brampton, ON | Jan 2024 – Apr 2024
+•	Designed and maintained SQL + Python ETL pipelines processing 50K+ transactions/month, improving reporting accuracy by 30%.
+•	Built interactive Power BI dashboards for sales and inventory across 10+ locations, reducing manual reporting by 50%.
+•	Conducted performance analysis to optimize delivery zones, boosting efficiency by 30%.
+•	Authored standard operating procedures (SOPs) and documentation, enabling consistent support handoffs and reducing recurring tickets.
+PROJECTS
+Business Analytics Projects
+•	Customer Insights Dashboard (Power BI + SQL) — Built interactive dashboard analyzing 100K+ transactions, uncovering buying trends and repeat-customer behaviors to guide promotions.
+•	Inventory Optimization (Excel + Power BI) — Implemented ABC classification and demand segmentation to reduce excess stock while safeguarding high-priority SKUs.
+•	Sales Forecasting (Python + Scikit-learn) — Developed regression models using historical data, achieving <8% error rate (RMSE) on monthly sales predictions.
+AI/ML Projects
+•	Runway & Taxi Time Prediction (Python + LightGBM) — Modeled FAA datasets for airports (LAX/JFK), achieving 90%+ accuracy in runway assignment and RMSE of 4–10 minutes in taxi time prediction.
+•	Fault Detection in Gearboxes (PyTorch + Time Series) — Created anomaly detection pipeline labeling sensor signals, enabling early equipment failure identification.
+•	Predictive Maintenance Analysis (Python + Spark) — Built machine learning pipeline on sensor + usage data to classify asset health states and forecast time-to-failure.
+SKILLS
+•	Data Analytics & Tools: SQL, Python, ETL, Spark, Pandas, Power BI, Excel
+•	Databases: SQL Server, PostgreSQL
+•	Machine Learning: Regression, Classification, Forecasting, Anomaly Detection
+•	Big Data & Cloud: Spark, Azure Data Fundamentals
+•	Other Skills: ETL automation, data cleaning, dashboarding, business process optimization
+EDUCATION
+•	Post Graduate Certificate, Artificial Intelligence & Machine Learning, Lambton College, Toronto — Apr 2024
+•	B.E. in Information Technology, Pune University — May 2018
+•	Certifications:
+o	Microsoft Azure Data Fundamentals 
+o	Google Data Analytics Professional Certificate 
