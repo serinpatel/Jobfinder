@@ -19,8 +19,8 @@ EMAIL_TO = os.getenv("EMAIL_TO", EMAIL_USER)
 
 # --- Load resumes ---
 resumes = {
-    "Dhaval": open("resume_dhaval.txt", "r", encoding="utf-8").read(),
-    "Serin": open("resume_serin.txt", "r", encoding="utf-8").read()
+    "Data Analyst": open("Data Analyst.txt", "r", encoding="utf-8").read(),
+    "Application Support Analyst": open("Application Support Analyst.txt", "r", encoding="utf-8").read()
 }
 
 # --- Embedding model ---
@@ -50,6 +50,21 @@ def match_jobs_to_resumes(jobs):
             score = float(util.cos_sim(model.encode(text, convert_to_tensor=True), job_emb))
             matches[name].append((score, j))
     return matches
+    
+def extract_job_link(job):
+    # Try multiple possible link sources in order of reliability
+    if job.get("apply_options"):
+        # Sometimes multiple apply links; pick the first
+        link = job["apply_options"][0].get("link")
+        if link:
+            return link
+    if job.get("related_links"):
+        link = job["related_links"][0].get("link")
+        if link:
+            return link
+    if job.get("link"):
+        return job["link"]
+    return "#"  # fallback if none found
 
 # --- Email Formatting ---
 def build_email(matches):
@@ -67,8 +82,9 @@ def build_email(matches):
             title = j.get("title", "No title")
             company = j.get("company_name", "Unknown")
             location = j.get("location", "Unknown")
-            link = j.get("link", "#")
-            html += f"<li><b>{title}</b> at {company} ({location}) – <b>{int(score*100)}% match</b><br><a href='{link}'>View Job</a></li>"
+            link = extract_job_link(j)
+            html += f"<li><b>{title}</b> at {company} ({location})<br>"
+            html += f"<a href='{link}' target='_blank'>🔗 View Job</a></li>"
         html += "</ul><br>"
     html += "</body></html>"
     return html
