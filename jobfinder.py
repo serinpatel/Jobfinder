@@ -3,7 +3,6 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from serpapi import GoogleSearch
-import requests
 import yaml
 from datetime import datetime
 
@@ -17,7 +16,7 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 EMAIL_TO = os.getenv("EMAIL_TO", EMAIL_USER)
 
-# --- Job Search Function ---
+# --- Job Search ---
 def search_jobs(role, location):
     params = {
         "engine": "google_jobs",
@@ -27,27 +26,30 @@ def search_jobs(role, location):
         "date_posted": "past_24_hours"
     }
     search = GoogleSearch(params)
-    results = search.get_dict().get("jobs_results", [])
-    return results
+    return search.get_dict().get("jobs_results", [])
 
-# --- Format HTML Email ---
-def format_email(jobs):
-    if not jobs:
-        return f"<p>No new jobs found today ({datetime.now().date()}).</p>"
-    html = f"""
-    <html>
-    <body>
-        <h2>🧭 Daily Job Digest ({datetime.now().strftime('%b %d, %Y')})</h2>
-        <p>Here are the latest jobs found in the last 24 hours:</p>
-        <ul>
-    """
-    for j in jobs[:20]:
-        title = j.get("title", "No title")
-        company = j.get("company_name", "Unknown")
-        location = j.get("location", "Unknown")
-        link = j.get("link", "#")
-        html += f"<li><b>{title}</b> at {company} ({location})<br><a href='{link}'>View Job</a></li><br>"
-    html += "</ul></body></html>"
+# --- Build Combined HTML ---
+def build_combined_html(all_results):
+    today = datetime.now().strftime('%b %d, %Y')
+    html = f"<html><body><h2>🧭 Daily Job Digest ({today})</h2>"
+    if not any(all_results.values()):
+        html += "<p>No new jobs found today.</p></body></html>"
+        return html
+
+    for role, jobs in all_results.items():
+        html += f"<h3>🔹 {role}</h3>"
+        if not jobs:
+            html += "<p>No new postings found for this role today.</p>"
+            continue
+        html += "<ul>"
+        for j in jobs[:15]:
+            title = j.get("title", "No title")
+            company = j.get("company_name", "Unknown")
+            location = j.get("location", "Unknown")
+            link = j.get("link", "#")
+            html += f"<li><b>{title}</b> at {company} ({location})<br><a href='{link}'>View Job</a></li>"
+        html += "</ul><br>"
+    html += "</body></html>"
     return html
 
 # --- Send Email ---
@@ -62,16 +64,23 @@ def send_email(subject, html_content):
         server.starttls()
         server.login(EMAIL_USER, EMAIL_PASS)
         server.send_message(msg)
+
     print(f"✅ Email sent to {EMAIL_TO}")
 
 # --- Main ---
 def main():
-    all_jobs = []
+    all_results = {}
     for role in config["roles"]:
-        for location in config["locations"]:
-            all_jobs.extend(search_jobs(role, location))
-    html = format_email(all_jobs)
-    send_email("🧭 Daily Job Digest", html)
+        jobs = []
+        for loc in config["locations"]:
+            jobs.extend(search_jobs(role, loc))
+        all_results[role] = jobs
+
+    html = build_combined_html(all_results)
+    send_email(
+        subject=f"🧭 Daily Job Digest – {datetime.now().strftime('%b %d, %Y')}",
+        html_content=html
+    )
 
 if __name__ == "__main__":
     main()
