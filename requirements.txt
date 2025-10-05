@@ -1,4 +1,5 @@
 requests
 pyyaml
+google-search-results
 serpapi==0.1.5
 python-dotenv
