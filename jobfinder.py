@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from serpapi.google_search import GoogleSearch
+from serpapi import GoogleSearch
 import requests
 import yaml
 from datetime import datetime
