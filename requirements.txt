@@ -1,4 +1,4 @@
 requests
 pyyaml
-serpapi==0.1.6
+serpapi==0.1.5
 python-dotenv
