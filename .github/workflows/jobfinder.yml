@@ -2,8 +2,8 @@ name: Job Finder Daily
 
 on:
   schedule:
-    - cron: "0 8 * * *"   # every day at 8AM UTC
-  workflow_dispatch:       # allows manual trigger
+    - cron: "0 8 * * *"   # runs every day at 8AM UTC
+  workflow_dispatch:
 
 jobs:
   run:
@@ -22,8 +22,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run job finder
+      - name: Run Job Finder
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python jobfinder.py
