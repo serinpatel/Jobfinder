@@ -1,0 +1,10 @@
+roles:
+  - "Data Analyst"
+  - "Application Support Analyst"
+locations:
+  - "Toronto"
+  - "Remote (Canada)"
+sources:
+  - "google_jobs"
+notify_via: "email"
+frequency_hours: 24
