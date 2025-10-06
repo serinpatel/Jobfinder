@@ -1,7 +1,7 @@
 import os, re, time, smtplib, yaml
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from serpapi import GoogleSearch   # safer import
+from serpapi import GoogleSearch
 from datetime import datetime
 from sentence_transformers import SentenceTransformer, util
 
@@ -12,7 +12,7 @@ with open("config.yaml", "r") as f:
 SERPAPI_KEY  = os.getenv("SERPAPI_KEY")
 EMAIL_USER   = os.getenv("EMAIL_USER")
 EMAIL_PASS   = os.getenv("EMAIL_PASS")
-EMAIL_TO     = os.getenv("EMAIL_TO")
+EMAIL_TO     = os.getenv("EMAIL_TO", EMAIL_USER)
 
 # --- Load resumes ---
 def _read_txt(path):
@@ -60,38 +60,64 @@ def _dedup(jobs):
 
 # -------- SerpAPI search --------
 def search_jobs_for_role(role, locations, sleep_sec=1.5):
-    """Fetch freshest available jobs (<=24h) for each role across given locations."""
+    """Fetch freshest available jobs (<=24h); fallback to 3-day window if none."""
     collected = []
     for loc in locations:
         q = f"{role} {loc}"
         params = {
-            "engine": "google_jobs", "q": q, "hl": "en",
-            "api_key": SERPAPI_KEY, "date_posted": "past_24_hours",
-            "sort_by": "date", "num": 20
+            "engine": "google_jobs",
+            "q": q,
+            "hl": "en",
+            "api_key": SERPAPI_KEY,
+            "date_posted": "past_24_hours",
+            "sort_by": "date",
+            "num": 20
         }
         results = GoogleSearch(params).get_dict().get("jobs_results", []) or []
         fresh = [r for r in results if is_fresh(r)]
         if fresh:
             collected.extend(fresh)
         time.sleep(sleep_sec)
+
+    # If nothing fresh found, broaden to last 3 days
+    if not collected:
+        for loc in locations:
+            q = f"{role} {loc}"
+            params = {
+                "engine": "google_jobs",
+                "q": q,
+                "hl": "en",
+                "api_key": SERPAPI_KEY,
+                "date_posted": "past_3_days",
+                "sort_by": "date",
+                "num": 20
+            }
+            results = GoogleSearch(params).get_dict().get("jobs_results", []) or []
+            collected.extend(results)
+            time.sleep(sleep_sec)
+
     return _dedup(collected)
 
 # -------- Matching --------
-def match_jobs_to_resumes(jobs):
+def match_jobs_to_resumes(rolewise_jobs):
+    """Compute match scores for each resume across all role-based job sets."""
     matches = {n: [] for n in resumes}
-    descs, job_refs = [], []
-    for j in jobs:
-        d = " ".join([j.get("title",""), j.get("company_name",""), j.get("description","")]).strip()
-        if d:
-            descs.append(d); job_refs.append(j)
-    if not job_refs:
-        return matches
-    job_embs = model.encode(descs, convert_to_tensor=True)
-    for idx, j in enumerate(job_refs):
-        emb = job_embs[idx]
-        for n, res_emb in resume_embeddings.items():
-            score = float(util.cos_sim(res_emb, emb))
-            matches[n].append((score, j))
+
+    for role, jobs in rolewise_jobs.items():
+        descs, job_refs = [], []
+        for j in jobs:
+            d = " ".join([j.get("title",""), j.get("company_name",""), j.get("description","")]).strip()
+            if d:
+                descs.append(d); job_refs.append(j)
+        if not job_refs:
+            continue
+
+        job_embs = model.encode(descs, convert_to_tensor=True)
+        for idx, j in enumerate(job_refs):
+            emb = job_embs[idx]
+            for n, res_emb in resume_embeddings.items():
+                score = float(util.cos_sim(res_emb, emb))
+                matches[n].append((score, j, role))
     return matches
 
 # -------- Email --------
@@ -103,12 +129,13 @@ def build_email(matches):
         if not jobs:
             html.append("<p>No fresh jobs today.</p>")
             continue
-        top = sorted(jobs, key=lambda x: x[0], reverse=True)[:15]
+        top = sorted(jobs, key=lambda x: x[0], reverse=True)[:20]
         html.append("<ul>")
-        for score, j in top:
+        for score, j, role in top:
             html.append(
                 f"<li><b>{j.get('title','')}</b> at {j.get('company_name','')} "
-                f"({j.get('location','')}) – <b>{int(score*100)}%</b> match<br>"
+                f"({j.get('location','')}) – <b>{int(score*100)}%</b> match "
+                f"<i>({role})</i><br>"
                 f"<a href='{extract_job_link(j)}' target='_blank' "
                 f"style='color:#1a73e8;text-decoration:none;'>🔗 View Job</a></li>"
             )
@@ -133,16 +160,19 @@ def main():
         if rl.lower() not in seen:
             seen.add(rl.lower()); roles.append(rl)
 
-    all_jobs = []
+    rolewise_jobs = {}
     for role in roles:
         fresh = search_jobs_for_role(role, config["locations"])
-        print(f"{role}: {len(fresh)} fresh jobs")
-        all_jobs.extend(fresh)
+        print(f"{role}: {len(fresh)} jobs found (fresh or last 3 days)")
+        rolewise_jobs[role] = fresh
         time.sleep(1)
 
-    matches = match_jobs_to_resumes(all_jobs)
+    matches = match_jobs_to_resumes(rolewise_jobs)
     html = build_email(matches)
-    send_email(f"🧭 {len(roles)}-Role Job Digest – {datetime.now():%b %d, %Y}", html)
+    send_email(
+        f"🧭 {len(roles)}-Role Job Digest – {datetime.now():%b %d, %Y}",
+        html
+    )
 
 if __name__ == "__main__":
     main()
