@@ -1,9 +1,24 @@
 roles:
   - "Data Analyst"
+  - "Junior Data Analyst"
+  - "Reporting Analyst"
+  - "Business Intelligence (BI) Analyst"
+  - "Operations Analyst"
   - "Application Support Analyst"
+  - "Technical Support Analyst"
+  - "Application Support Specialist" 
+  - "Applications Analyst"
+  - "Software Support Analyst"
+  - "IT Support Analyst"
+  - "Technical Support Analyst"
+  - "Helpdesk Analyst"
+  - "Desktop Support Analyst"
+  - "Application Support Engineer"
+
 locations:
   - "Toronto"
   - "Remote (Canada)"
+  - "Ontario, canada"
 sources:
   - "google_jobs"
 notify_via: "email"
