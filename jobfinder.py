@@ -12,7 +12,7 @@ with open("config.yaml", "r") as f:
 SERPAPI_KEY  = os.getenv("SERPAPI_KEY")
 EMAIL_USER   = os.getenv("EMAIL_USER")
 EMAIL_PASS   = os.getenv("EMAIL_PASS")
-EMAIL_TO     = os.getenv("EMAIL_TO", EMAIL_USER)
+EMAIL_TO     = os.getenv("EMAIL_TO")
 
 # --- Load resumes ---
 def _read_txt(path):
